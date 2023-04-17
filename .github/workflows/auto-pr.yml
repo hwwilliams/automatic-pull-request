@@ -1,21 +1,10 @@
 name: Automatic Pull Request
 
 env:
-  GH_CLI_PAT: ${{ secrets.GH_CLI_PAT }}
-  GH_CLI_PR_JSON_FIELDS: '[
-    "closed",
-    "headRefName",
-    "id",
-    "mergeable",
-    "mergeStateStatus",
-    "number",
-    "state",
-    "title",
-    "url"
-  ]'
-
-  repository_owner: hwwilliams
-  repository_name: automatic-pull-request
+  GH_CLI_PAT: ${{ SECRETS.GH_CLI_PAT }}
+  GH_CLI_PR_JSON_FIELDS: CLOSED,HEADREFNAME,ID,MERGEABLE,MERGESTATESTATUS,NUMBER,STATE,TITLE,URL
+  REPOSITORY_OWNER: HWWILLIAMS
+  REPOSITORY_NAME: automatic-pull-request
 
 on:
   push:
@@ -39,11 +28,10 @@ jobs:
       - name: Check for Existing Pull Requests
         shell: pwsh
         run: |
-          $JsonFieldsCsv = (${{ env.GH_CLI_PR_JSON_FIELDS }} | ConvertFrom-Json) -join ","
-          $RepoFullName="${{ env.repository_owner }}/${{ env.repository_name }}"
+          $RepoFullName="${{ env.REPOSITORY_OWNER }}/${{ env.REPOSITORY_NAME }}"
 
           echo "Checking for existing pull requests on repository '$REPO_FULL_NAME'"
-          $RepoPRsJson = gh pr -R "$RepoFullName" list --json "$JsonFieldsCsv"
+          $RepoPRsJson = gh pr -R "$RepoFullName" list --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
           $RepoPRs = $RepoPRsJson | ConvertFrom-Json -AsHashtable
           $OpenRepoPRs = $RepoPRs.Where({ $PSItem.state -eq "OPEN" })
 
