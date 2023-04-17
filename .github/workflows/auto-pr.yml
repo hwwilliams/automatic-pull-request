@@ -27,6 +27,9 @@ jobs:
 
       - name: Create New Release Branch
         run: |
+          echo "Fetch origin"
+          git fetch origin
+
           echo "Checkout release"
           git checkout release
           git pull
