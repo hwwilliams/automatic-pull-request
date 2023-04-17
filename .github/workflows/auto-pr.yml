@@ -37,13 +37,13 @@ jobs:
           echo "Creating new branch 'release-${{ steps.date.outputs.date }}' based on release"
           git checkout -b release-${{ steps.date.outputs.date }}
 
-      - name: Merge development -> staging
+      - name: Merge main -> release-${{ steps.date.outputs.date }}
         uses: devmasx/merge-branch@master
         with:
           type: now
           from_branch: main
           target_branch: release-${{ steps.date.outputs.date }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ env.GH_CLI_PAT }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v5
