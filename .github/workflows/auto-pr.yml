@@ -74,7 +74,7 @@ jobs:
           git checkout -b release-${{ steps.date.outputs.date }}
 
           echo "Merging main into release-${{ steps.date.outputs.date }}"
-          git merge main
+          git merge main -vvv
 
           echo "Pushing new branch release-${{ steps.date.outputs.date }} to remote"
           git push
