@@ -26,7 +26,7 @@ jobs:
           echo "date=$date" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request into Release
-        if: steps.check_pull_request.outputs.exist == 'false'
+        # if: steps.check_pull_request.outputs.exist == 'false'
         run: |
           git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
           git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
