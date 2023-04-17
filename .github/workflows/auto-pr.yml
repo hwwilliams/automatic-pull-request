@@ -1,6 +1,8 @@
 name: Automatic Pull Request
 
 env:
+  GH_CLI_PAT: ${{ secrets.GH_CLI_PAT }}
+
   repository_owner: hwwilliams
   repository_name: automatic-pull-request
 
@@ -37,3 +39,5 @@ jobs:
           else
             echo "$REPO_PR"
           fi
+        env:
+          GH_TOKEN: ${{ env.GH_CLI_PAT }}
