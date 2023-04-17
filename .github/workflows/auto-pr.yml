@@ -65,14 +65,14 @@ jobs:
           echo "Fetch all git branches"
           git fetch --all
 
-          echo "Checkout git branch release"
-          git checkout release
+          echo "Checkout git branch main"
+          git checkout main
 
           echo "Creating new branch based on release"
           git checkout -b release-${{ steps.date.outputs.date }}
 
-          echo "Merging origin/main into release"
-          git merge origin/main
+          echo "Merging origin/release into release"
+          git merge origin/release
 
           echo "Pushing new release branch to remote"
           git push --set-upstream origin release-${{ steps.date.outputs.date }}
