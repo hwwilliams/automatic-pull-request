@@ -2,7 +2,7 @@ name: Automatic Pull Request
 
 env:
   GH_CLI_PAT: ${{ SECRETS.GH_CLI_PAT }}
-  GH_CLI_PR_JSON_FIELDS: CLOSED,HEADREFNAME,ID,MERGEABLE,MERGESTATESTATUS,NUMBER,STATE,TITLE,URL
+  GH_CLI_PR_JSON_FIELDS: closed,headRefName,id,mergeable,mergeStateStatus,number,state,title,url
   REPOSITORY_OWNER: HWWILLIAMS
   REPOSITORY_NAME: automatic-pull-request
 
