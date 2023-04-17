@@ -17,7 +17,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout main branch
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Get Date
         id: date
@@ -72,7 +75,7 @@ jobs:
           echo "Creating new branch based on release"
           git checkout -b release-${{ steps.date.outputs.date }}
 
-          echo "Merging release into release-${{ steps.date.outputs.date }}"
+          echo "Merging main into release-${{ steps.date.outputs.date }}"
           git merge origin/main
 
           echo "Pushing new branch release-${{ steps.date.outputs.date }} to remote"
