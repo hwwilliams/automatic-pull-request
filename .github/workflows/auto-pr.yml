@@ -2,6 +2,17 @@ name: Automatic Pull Request
 
 env:
   GH_CLI_PAT: ${{ secrets.GH_CLI_PAT }}
+  GH_CLI_PR_JSON_FIELDS: '[
+    "closed",
+    "headRefName",
+    "id",
+    "mergeable",
+    "mergeStateStatus",
+    "number",
+    "state",
+    "title",
+    "url"
+  ]'
 
   repository_owner: hwwilliams
   repository_name: automatic-pull-request
@@ -19,25 +30,30 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Get Date
-        id: date
-        run: |
-          date=$(date +'%Y-%m-%d')
-          echo "date=$date" >> $GITHUB_OUTPUT
+      # - name: Get Date
+      #   id: date
+      #   run: |
+      #     date=$(date +'%Y-%m-%d')
+      #     echo "date=$date" >> $GITHUB_OUTPUT
 
       - name: Check for Existing Pull Requests
+        shell: pwsh
         run: |
-          JSON_FIELDS=("closed" "headRefName" "id" "mergeable" "mergeStateStatus" "number" "state" "title" "url")
-          JSON_FIELDS_CSV=$(IFS=, ; echo "${JSON_FIELDS[*]}")
+          $JsonFieldsCsv = (${{ env.GH_CLI_PR_JSON_FIELDS }} | ConvertFrom-Json) -join ","
+          $RepoFullName="${{ env.repository_owner }}/${{ env.repository_name }}"
 
-          REPO_FULL_NAME="${{ env.repository_owner }}/${{ env.repository_name }}"
           echo "Checking for existing pull requests on repository '$REPO_FULL_NAME'"
+          $RepoPRsJson = gh pr -R "$RepoFullName" list --json "$JsonFieldsCsv"
+          $RepoPRs = $RepoPRsJson | ConvertFrom-Json -AsHashtable
+          $OpenRepoPRs = $RepoPRs.Where({ $PSItem.state -eq "OPEN" })
 
-          REPO_PR=$(gh pr -R "$REPO_FULL_NAME" list --json "$JSON_FIELDS_CSV")
-          if [[ "$REPO_PR" == "no open pull requests"*  ]]; then
-            echo "Found 0 pull requests for repository '$REPO_FULL_NAME'"
+          if ($OpenRepoPRs.Count -gt 0)
+          {
+            $OpenRepoPRs
+          }
           else
-            echo "$REPO_PR"
-          fi
+          {
+            Write-Warning "Found 0 pull requests for repository '$RepoFullName'"
+          }
         env:
           GH_TOKEN: ${{ env.GH_CLI_PAT }}
