@@ -31,8 +31,9 @@ jobs:
           JSON_FIELDS_CSV=$(IFS=, ; echo "${JSON_FIELDS[*]}")
 
           REPO_FULL_NAME="${{ env.repository_owner }}/${{ env.repository_name }}"
-          REPO_PR=$(gh pr -R "$REPO_FULL_NAME" list --json "$JSON_FIELDS_CSV")
+          echo "Checking for existing pull requests on repository '$REPO_FULL_NAME'"
 
+          REPO_PR=$(gh pr -R "$REPO_FULL_NAME" list --json "$JSON_FIELDS_CSV")
           if [[ "$REPO_PR" == "no open pull requests"*  ]]; then
             echo "Found 0 pull requests for repository '$REPO_FULL_NAME'"
           else
