@@ -30,18 +30,27 @@ jobs:
         run: |
           $RepoFullName="${{ env.REPOSITORY_OWNER }}/${{ env.REPOSITORY_NAME }}"
 
-          echo "Checking for existing pull requests on repository '$REPO_FULL_NAME'"
+          echo "Checking for existing pull requests on repository '$RepoFullName'"
           $RepoPRsJson = gh pr -R "$RepoFullName" list --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
-          $RepoPRs = $RepoPRsJson | ConvertFrom-Json -AsHashtable
-          $OpenRepoPRs = $RepoPRs.Where({ $PSItem.state -eq "OPEN" })
 
-          if ($OpenRepoPRs.Count -gt 0)
+          $OpenRepoPRs = ($RepoPRsJson | ConvertFrom-Json -AsHashtable).Where({ $PSItem.state -eq "OPEN" })
+          if ($OpenRepoPRs.Count -ge 2)
           {
+            Write-Error "Found $($OpenRepoPRs.Count) release PRs open"
             $OpenRepoPRs
+          }
+          elseif ($OpenRepoPRs.Count -eq 1)
+          {
+            Write-Output "Found release PR"
+            $OpenRepoPRs
+
+            echo "existing_pull_request=true" >> $env:GITHUB_OUTPUT
           }
           else
           {
             Write-Warning "Found 0 pull requests for repository '$RepoFullName'"
+
+            echo "existing_pull_request=false" >> $env:GITHUB_OUTPUT
           }
         env:
           GH_TOKEN: ${{ env.GH_CLI_PAT }}
