@@ -23,6 +23,17 @@ jobs:
           fetch-depth: 0
           token: ${{ env.GH_CLI_PAT }}
 
+      - name: Configure Git User
+        run: |
+          echo "Configure git user"
+          git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+          git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+
+      - name: Fetch Git Branches
+        run: |
+          echo "Fetch all git branches"
+          git fetch --all
+
       - name: Get Date
         id: date
         run: |
@@ -35,26 +46,24 @@ jobs:
         run: |
           $RepoFullName="${{ env.REPOSITORY_OWNER }}/${{ env.REPOSITORY_NAME }}"
 
-          echo "Checking for existing pull requests on repository '$RepoFullName'"
-          $RepoPRsJson = gh pr -R "$RepoFullName" list --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
+          Write-Output "Checking for existing release pull requests on repository '$RepoFullName'"
+          $OpenRepoPRsJson = gh pr list --state open --base release --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
 
-          $OpenRepoPRs = ($RepoPRsJson | ConvertFrom-Json -AsHashtable).Where({ $PSItem.state -eq "OPEN" })
+          $OpenRepoPRs = $OpenRepoPRsJson | ConvertFrom-Json -Depth 100
           if ($OpenRepoPRs.Count -ge 2)
           {
-            Write-Error "Found $($OpenRepoPRs.Count) release PRs open"
             $OpenRepoPRs
+            Write-Error "Found $($OpenRepoPRs.Count) release PRs open"
           }
           elseif ($OpenRepoPRs.Count -eq 1)
           {
-            Write-Output "Found release PR"
             $OpenRepoPRs
-
+            Write-Output "Found release PR"
             echo "exist=true" >> $env:GITHUB_OUTPUT
           }
           else
           {
             Write-Warning "Found 0 pull requests for repository '$RepoFullName'"
-
             echo "exist=false" >> $env:GITHUB_OUTPUT
           }
         env:
@@ -63,12 +72,6 @@ jobs:
       - name: Create Pull Request into Release
         if: steps.check_pull_request.outputs.exist == 'false'
         run: |
-          git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-          git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-
-          echo "Fetch all"
-          git fetch --all
-
           echo "Checkout branch release"
           git checkout release
           git pull
@@ -93,14 +96,8 @@ jobs:
       - name: Merge Incoming Changes into the Open Existing Release Pull Request
         if: steps.check_pull_request.outputs.exist == 'true'
         run: |
-          git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-          git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-
           echo "Getting release branch name"
           REPO_BRANCH_NAME=$(gh pr list --state open --base release --json headRefName --jq '.[].headRefName')
-
-          echo "Fetch all"
-          git fetch --all
 
           echo "Checkout branch $REPO_BRANCH_NAME"
           git checkout $REPO_BRANCH_NAME
