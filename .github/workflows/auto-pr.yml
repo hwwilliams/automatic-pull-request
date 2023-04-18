@@ -103,12 +103,12 @@ jobs:
           git fetch --all
 
           echo "Checkout branch $REPO_BRANCH_NAME"
-          # git checkout $REPO_BRANCH_NAME
+          git checkout $REPO_BRANCH_NAME
 
-          # echo "Merge origin/main into $REPO_BRANCH_NAME"
-          # git merge origin/main
+          echo "Merge origin/main into $REPO_BRANCH_NAME"
+          git merge origin/main
 
-          # echo "Push merged changed"
-          # git push origin $REPO_BRANCH_NAME
+          echo "Push merged changed"
+          git push origin $REPO_BRANCH_NAME
         env:
           GH_TOKEN: ${{ env.GH_CLI_PAT }}
