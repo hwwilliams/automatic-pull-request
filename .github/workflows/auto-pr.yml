@@ -66,8 +66,8 @@ jobs:
           git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
           git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
 
-          echo "Fetch origin"
-          git fetch origin
+          echo "Fetch all"
+          git fetch --all
 
           echo "Checkout branch release"
           git checkout release
@@ -79,7 +79,7 @@ jobs:
           echo "Merging main into release-${{ steps.date.outputs.date }}"
           git merge origin/main
 
-          echo "Pushing new branch release-${{ steps.date.outputs.date }} to remote"
+          echo "Push new branch release-${{ steps.date.outputs.date }}"
           git push -u origin release-${{ steps.date.outputs.date }}
 
           echo "Creating pull request for release-${{ steps.date.outputs.date }} into release"
@@ -90,28 +90,25 @@ jobs:
         env:
           GH_TOKEN: ${{ env.GH_CLI_PAT }}
 
-      # - name: Merge Incoming Changes into the Open Existing Release Pull Request
-      #   if: steps.check_pull_request.outputs.exist == 'true'
-      #   run: |
-      #     git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
-      #     git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+      - name: Merge Incoming Changes into the Open Existing Release Pull Request
+        if: steps.check_pull_request.outputs.exist == 'true'
+        run: |
+          git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
+          git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
 
-      #     echo "Querying Release branch for open Pull Requests and merge incoming changes"
-      #     gh pr list --state open --base release
-      #     gh pr list --state open --base release | awk '{print $5}'
+          echo "Getting release branch name"
+          REPO_BRANCH_NAME=$(gh pr list --state open --base release --json headRefName --jq '.[].headRefName')
 
-      #     BRANCH=`gh pr list --state open --base release | awk '{print $5}'`
+          echo "Fetch all"
+          git fetch --all
 
-      #     echo $BRANCH
-      #     git fetch --all
+          echo "Checkout branch $REPO_BRANCH_NAME"
+          git checkout $REPO_BRANCH_NAME
 
-      #     echo "running : git checkout $BRANCH"
-      #     git checkout $BRANCH
+          echo "Merge origin/main into $REPO_BRANCH_NAME"
+          git merge origin/main
 
-      #     echo "runnning : git merge 'origin/main'"
-      #     git merge origin/main
-
-      #     echo "running : git push 'origin $BRANCH'"
-      #     git push origin $BRANCH
-      #   env:
-      #     GH_TOKEN: ${{ env.GH_CLI_PAT }}
+          echo "Push merged changed"
+          git push origin $REPO_BRANCH_NAME
+        env:
+          GH_TOKEN: ${{ env.GH_CLI_PAT }}
