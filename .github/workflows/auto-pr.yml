@@ -49,7 +49,7 @@ jobs:
           Write-Output "Checking for existing release pull requests on repository '$RepoFullName'"
           $OpenRepoPRsJson = gh pr list --state open --base release --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
 
-          $OpenRepoPRs = $OpenRepoPRsJson | ConvertFrom-Json -AsHashtable -Depth 100
+          $OpenRepoPRs = $OpenRepoPRsJson | ConvertFrom-Json -Depth 100
           if ($OpenRepoPRs.Count -ge 2)
           {
             $OpenRepoPRs
