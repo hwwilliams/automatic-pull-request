@@ -97,7 +97,7 @@ jobs:
           git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
 
           echo "Getting release branch name"
-          REPO_BRANCH_NAME=$(gh pr list --state open --base release --jq '.')
+          REPO_BRANCH_NAME=$(gh pr list --state open --base release --json headRefName --jq '.')
 
           echo "Fetch all"
           git fetch --all
