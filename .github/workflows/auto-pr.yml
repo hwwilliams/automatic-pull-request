@@ -47,17 +47,18 @@ jobs:
           $RepoFullName="${{ env.REPOSITORY_OWNER }}/${{ env.REPOSITORY_NAME }}"
 
           Write-Output "Checking for existing release pull requests on repository '$RepoFullName'"
-          $RepoPRsJson = gh pr list --state open --base release --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
+          $OpenRepoPRsJson = gh pr list --state open --base release --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
 
-          $OpenRepoPRs = ($RepoPRsJson | ConvertFrom-Json -AsHashtable)
+          $OpenRepoPRs = $OpenRepoPRsJson | ConvertFrom-Json -AsHashtable -Depth 100
           if ($OpenRepoPRs.Count -ge 2)
           {
-            Write-Error "Found $($OpenRepoPRs.Count) release PRs open"
             $OpenRepoPRs
+            Write-Error "Found $($OpenRepoPRs.Count) release PRs open"
           }
           elseif ($OpenRepoPRs.Count -eq 1)
           {
-            Write-Output "Found release PR"; $OpenRepoPRs
+            $OpenRepoPRs
+            Write-Output "Found release PR"
             echo "exist=true" >> $env:GITHUB_OUTPUT
           }
           else
