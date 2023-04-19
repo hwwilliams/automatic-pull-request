@@ -2,9 +2,6 @@ name: Automatic Pull Request
 
 env:
   GH_CLI_PAT: ${{ SECRETS.GH_CLI_PAT }}
-  GH_CLI_PR_JSON_FIELDS: closed,headRefName,id,mergeable,mergeStateStatus,number,state,title,url
-  REPOSITORY_OWNER: HWWILLIAMS
-  REPOSITORY_NAME: automatic-pull-request
 
 on:
   push:
@@ -25,14 +22,11 @@ jobs:
 
       - name: Configure Git User
         run: |
-          echo "Configure git user"
           git config user.email "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
           git config user.name "${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>"
 
       - name: Fetch Git Branches
-        run: |
-          echo "Fetch all git branches"
-          git fetch --all
+        run: git fetch --all
 
       - name: Get Date
         id: date
@@ -40,16 +34,12 @@ jobs:
           date=$(date +'%Y-%m-%d')
           echo "date=$date" >> $GITHUB_OUTPUT
 
-      - name: Check for Existing Pull Requests
+      - name: Check for Existing Release Pull Requests
         id: check_pull_request
         shell: pwsh
         run: |
-          $RepoFullName="${{ env.REPOSITORY_OWNER }}/${{ env.REPOSITORY_NAME }}"
-
-          Write-Output "Checking for existing release pull requests on repository '$RepoFullName'"
-          $OpenRepoPRsJson = gh pr list --state open --base release --json "${{ env.GH_CLI_PR_JSON_FIELDS }}"
-
-          $OpenRepoPRs = $OpenRepoPRsJson | ConvertFrom-Json -Depth 100
+          Write-Output "Checking for existing release pull requests"
+          $OpenRepoPRs = gh pr list --state open --base release --json headRefName | ConvertFrom-Json -Depth 100
           if ($OpenRepoPRs.Count -ge 2)
           {
             $OpenRepoPRs
@@ -63,7 +53,7 @@ jobs:
           }
           else
           {
-            Write-Warning "Found 0 pull requests for repository '$RepoFullName'"
+            Write-Warning "Found 0 pull requests"
             echo "exist=false" >> $env:GITHUB_OUTPUT
           }
         env:
