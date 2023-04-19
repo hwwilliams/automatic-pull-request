@@ -39,7 +39,7 @@ jobs:
         shell: pwsh
         run: |
           Write-Output "Checking for existing release pull requests"
-          $JsonFields = "headRefName,mergeable,mergeStateStatus,number,state,title,url"
+          $JsonFields = "title,headRefName,number,state,mergeStateStatus,mergeable,url"
           $OpenRepoPRs = gh pr list --state open --base release --json $JsonFields | ConvertFrom-Json -Depth 100
           if ($OpenRepoPRs.Count -ge 2)
           {
